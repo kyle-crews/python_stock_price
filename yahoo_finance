@@ -1,0 +1,32 @@
+import yfinance as yf
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
+# Query stock prices using the Yahoo Finance API
+ticker = "AAPL"
+df = yf.Ticker(ticker).history(period="1y")
+
+# Preprocess the data
+df = df.dropna()  # drop rows with missing values
+X = df[['Open', 'High', 'Low', 'Close', 'Volume']].values  # select features
+y = df['Close'].values  # select target
+
+# Split the data into training and testing sets
+n_samples = X.shape[0]
+X_train, y_train = X[:int(0.8*n_samples)], y[:int(0.8*n_samples)]
+X_test, y_test = X[int(0.8*n_samples):], y[int(0.8*n_samples):]
+
+# Train the model
+regressor = LinearRegression()
+regressor.fit(X_train, y_train)
+
+# Evaluate the model
+y_pred = regressor.predict(X_test)
+mse = np.mean((y_pred - y_test)**2)
+print(f"Mean squared error: {mse:.2f}")
+print(y_pred)
+
+# Use the model to make predictions on new data
+new_data = np.array([[149.10, 144.56, 155.483, 153.086, 150.40]])  # example data
+prediction = regressor.predict(new_data)
+print(f"Prediction for new data: {prediction[0]:.2f}")
